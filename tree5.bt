@@ -1,0 +1,15 @@
+3
+0 1 2 
+
+Node: 0
+bid: 
+changes: 
+
+Node: 1
+bid: 1C
+changes: LENGTH CLUBS 5+;
+
+Node: 2
+bid: 1D
+changes: LENGTH CLUBS 5+;
+
