@@ -9,6 +9,8 @@ subtree::subtree(Node *root, std::vector <Node *> bidSeq, QWidget *parent) :
 {
     ui->setupUi(this);
 
+    this->setWindowTitle(QString("Add Subtree"));
+
     this->setFixedSize(geometry().width(), geometry().height());
 
     ui->seqScrollArea->setWidgetResizable(true);

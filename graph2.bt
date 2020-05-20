@@ -1,0 +1,45 @@
+8
+0 1 2 3 4 5 
+5 6 
+6 7 
+
+Node: 0
+bid: 
+saved: 0
+changes: 
+
+Node: 1
+bid: 1C
+saved: 1
+changes: LENGTH CLUBS 5+; HCP 12-21; CATEGORY NATURAL OPENING;
+
+Node: 2
+bid: 1D
+saved: 1
+changes: LENGTH DIAMONDS 5+; HCP 12-21; CATEGORY NATURAL OPENING;
+
+Node: 3
+bid: 1H
+saved: 1
+changes: LENGTH HEARTS 5+; HCP 12-21; CATEGORY NATURAL OPENING;
+
+Node: 4
+bid: 1S
+saved: 1
+changes: LENGTH SPADES 5+; HCP 12-21; CATEGORY NATURAL OPENING;
+
+Node: 5
+bid: 1NT
+saved: 1
+changes: LENGTH CLUBS 2-5; LENGTH DIAMONDS 2-5; LENGTH HEARTS 2-5; LENGTH SPADES 2-5; HCP 15-17; CATEGORY NATURAL OPENING;
+
+Node: 6
+bid: 2D
+saved: 1
+changes: LENGTH HEARTS 5+; CATEGORY ARTIFICIAL TRANSFER JACOBY TO HEARTS;
+
+Node: 7
+bid: 2H
+saved: 1
+changes: CATEGORY ARTIFICIAL TRANSFER ACCEPTED;
+

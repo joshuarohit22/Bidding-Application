@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'test.ui'
 **
-** Created by: Qt User Interface Compiler version 5.12.8
+** Created by: Qt User Interface Compiler version 5.14.1
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
 ********************************************************************************/
@@ -215,16 +215,16 @@ public:
 
     void retranslateUi(QWidget *test)
     {
-        test->setWindowTitle(QApplication::translate("test", "test", nullptr));
-        root->setText(QApplication::translate("test", "Root", nullptr));
-        seqLabel->setText(QApplication::translate("test", "Current Seqeunce", nullptr));
-        parentInfoLabel->setText(QApplication::translate("test", "TextLabel", nullptr));
-        childLabel->setText(QApplication::translate("test", "Current Children", nullptr));
-        addSubTree->setText(QApplication::translate("test", "Add Subtree", nullptr));
-        addChildButton->setText(QApplication::translate("test", "Addchild", nullptr));
-        newFile->setText(QApplication::translate("test", "New File", nullptr));
-        LoadFile->setText(QApplication::translate("test", "Load File", nullptr));
-        SaveFile->setText(QApplication::translate("test", "Save File", nullptr));
+        test->setWindowTitle(QCoreApplication::translate("test", "test", nullptr));
+        root->setText(QCoreApplication::translate("test", "Root", nullptr));
+        seqLabel->setText(QCoreApplication::translate("test", "Current Seqeunce", nullptr));
+        parentInfoLabel->setText(QCoreApplication::translate("test", "TextLabel", nullptr));
+        childLabel->setText(QCoreApplication::translate("test", "Current Children", nullptr));
+        addSubTree->setText(QCoreApplication::translate("test", "Add Subtree", nullptr));
+        addChildButton->setText(QCoreApplication::translate("test", "Addchild", nullptr));
+        newFile->setText(QCoreApplication::translate("test", "New File", nullptr));
+        LoadFile->setText(QCoreApplication::translate("test", "Load File", nullptr));
+        SaveFile->setText(QCoreApplication::translate("test", "Save File", nullptr));
     } // retranslateUi
 
 };

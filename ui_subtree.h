@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'subtree.ui'
 **
-** Created by: Qt User Interface Compiler version 5.12.8
+** Created by: Qt User Interface Compiler version 5.14.1
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
 ********************************************************************************/
@@ -145,12 +145,12 @@ public:
 
     void retranslateUi(QWidget *subtree)
     {
-        subtree->setWindowTitle(QApplication::translate("subtree", "Form", nullptr));
-        rootBtn->setText(QApplication::translate("subtree", "root", nullptr));
-        label->setText(QApplication::translate("subtree", "Current Sequence", nullptr));
-        label_2->setText(QApplication::translate("subtree", "Current Children", nullptr));
-        okBtn->setText(QApplication::translate("subtree", "Ok", nullptr));
-        cancelBtn->setText(QApplication::translate("subtree", "Cancel", nullptr));
+        subtree->setWindowTitle(QCoreApplication::translate("subtree", "Form", nullptr));
+        rootBtn->setText(QCoreApplication::translate("subtree", "root", nullptr));
+        label->setText(QCoreApplication::translate("subtree", "Current Sequence", nullptr));
+        label_2->setText(QCoreApplication::translate("subtree", "Current Children", nullptr));
+        okBtn->setText(QCoreApplication::translate("subtree", "Ok", nullptr));
+        cancelBtn->setText(QCoreApplication::translate("subtree", "Cancel", nullptr));
     } // retranslateUi
 
 };

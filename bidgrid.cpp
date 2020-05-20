@@ -60,6 +60,7 @@ bidGrid::bidGrid(std::vector <Node *> bidSeq, Node *currNode, QWidget *parent) :
     ui(new Ui::bidGrid)
 {
     ui->setupUi(this);
+    this->setWindowTitle(QString("Add bid child"));
 
     int i = bidSeq.size() - 1;
 

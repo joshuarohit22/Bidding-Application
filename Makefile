@@ -399,6 +399,9 @@ moc_bidgrid.cpp: bidgrid.h \
 	/usr/lib/qt5/bin/moc $(DEFINES) --include /home/joshua/Qt/test1/moc_predefs.h -I/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++ -I/home/joshua/Qt/test1 -I/usr/include/x86_64-linux-gnu/qt5 -I/usr/include/x86_64-linux-gnu/qt5/QtWidgets -I/usr/include/x86_64-linux-gnu/qt5/QtGui -I/usr/include/x86_64-linux-gnu/qt5/QtCore -I/usr/include/c++/9 -I/usr/include/x86_64-linux-gnu/c++/9 -I/usr/include/c++/9/backward -I/usr/lib/gcc/x86_64-linux-gnu/9/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/9/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include bidgrid.h -o moc_bidgrid.cpp
 
 moc_subtree.cpp: subtree.h \
+		node.h \
+		playerinfo.h \
+		bounds.h \
 		moc_predefs.h \
 		/usr/lib/qt5/bin/moc
 	/usr/lib/qt5/bin/moc $(DEFINES) --include /home/joshua/Qt/test1/moc_predefs.h -I/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++ -I/home/joshua/Qt/test1 -I/usr/include/x86_64-linux-gnu/qt5 -I/usr/include/x86_64-linux-gnu/qt5/QtWidgets -I/usr/include/x86_64-linux-gnu/qt5/QtGui -I/usr/include/x86_64-linux-gnu/qt5/QtCore -I/usr/include/c++/9 -I/usr/include/x86_64-linux-gnu/c++/9 -I/usr/include/c++/9/backward -I/usr/lib/gcc/x86_64-linux-gnu/9/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/9/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include subtree.h -o moc_subtree.cpp
@@ -466,6 +469,9 @@ playerinfo.o: playerinfo.cpp playerinfo.h \
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o playerinfo.o playerinfo.cpp
 
 subtree.o: subtree.cpp subtree.h \
+		node.h \
+		playerinfo.h \
+		bounds.h \
 		ui_subtree.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o subtree.o subtree.cpp
 
