@@ -1,16 +1,16 @@
 /****************************************************************************
-** Meta object code from reading C++ file 'bidgrid.h'
+** Meta object code from reading C++ file 'lengthmenu.h'
 **
 ** Created by: The Qt Meta Object Compiler version 67 (Qt 5.12.8)
 **
 ** WARNING! All changes made in this file will be lost!
 *****************************************************************************/
 
-#include "bidgrid.h"
+#include "lengthmenu.h"
 #include <QtCore/qbytearray.h>
 #include <QtCore/qmetatype.h>
 #if !defined(Q_MOC_OUTPUT_REVISION)
-#error "The header file 'bidgrid.h' doesn't include <QObject>."
+#error "The header file 'lengthmenu.h' doesn't include <QObject>."
 #elif Q_MOC_OUTPUT_REVISION != 67
 #error "This file was generated using the moc from 5.12.8. It"
 #error "cannot be used with the include files from this version of Qt."
@@ -20,29 +20,29 @@
 QT_BEGIN_MOC_NAMESPACE
 QT_WARNING_PUSH
 QT_WARNING_DISABLE_DEPRECATED
-struct qt_meta_stringdata_bidGrid_t {
-    QByteArrayData data[5];
-    char stringdata0[31];
+struct qt_meta_stringdata_LengthMenu_t {
+    QByteArrayData data[4];
+    char stringdata0[50];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
-    qptrdiff(offsetof(qt_meta_stringdata_bidGrid_t, stringdata0) + ofs \
+    qptrdiff(offsetof(qt_meta_stringdata_LengthMenu_t, stringdata0) + ofs \
         - idx * sizeof(QByteArrayData)) \
     )
-static const qt_meta_stringdata_bidGrid_t qt_meta_stringdata_bidGrid = {
+static const qt_meta_stringdata_LengthMenu_t qt_meta_stringdata_LengthMenu = {
     {
-QT_MOC_LITERAL(0, 0, 7), // "bidGrid"
-QT_MOC_LITERAL(1, 8, 7), // "sendBid"
-QT_MOC_LITERAL(2, 16, 0), // ""
-QT_MOC_LITERAL(3, 17, 3), // "str"
-QT_MOC_LITERAL(4, 21, 9) // "onClicked"
+QT_MOC_LITERAL(0, 0, 10), // "LengthMenu"
+QT_MOC_LITERAL(1, 11, 16), // "on_okBtn_clicked"
+QT_MOC_LITERAL(2, 28, 0), // ""
+QT_MOC_LITERAL(3, 29, 20) // "on_cancelBtn_clicked"
 
     },
-    "bidGrid\0sendBid\0\0str\0onClicked"
+    "LengthMenu\0on_okBtn_clicked\0\0"
+    "on_cancelBtn_clicked"
 };
 #undef QT_MOC_LITERAL
 
-static const uint qt_meta_data_bidGrid[] = {
+static const uint qt_meta_data_LengthMenu[] = {
 
  // content:
        8,       // revision
@@ -53,69 +53,57 @@ static const uint qt_meta_data_bidGrid[] = {
        0,    0, // enums/sets
        0,    0, // constructors
        0,       // flags
-       1,       // signalCount
-
- // signals: name, argc, parameters, tag, flags
-       1,    1,   24,    2, 0x06 /* Public */,
+       0,       // signalCount
 
  // slots: name, argc, parameters, tag, flags
-       4,    0,   27,    2, 0x08 /* Private */,
-
- // signals: parameters
-    QMetaType::Void, QMetaType::QString,    3,
+       1,    0,   24,    2, 0x08 /* Private */,
+       3,    0,   25,    2, 0x08 /* Private */,
 
  // slots: parameters
+    QMetaType::Void,
     QMetaType::Void,
 
        0        // eod
 };
 
-void bidGrid::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
+void LengthMenu::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
 {
     if (_c == QMetaObject::InvokeMetaMethod) {
-        auto *_t = static_cast<bidGrid *>(_o);
+        auto *_t = static_cast<LengthMenu *>(_o);
         Q_UNUSED(_t)
         switch (_id) {
-        case 0: _t->sendBid((*reinterpret_cast< QString(*)>(_a[1]))); break;
-        case 1: _t->onClicked(); break;
+        case 0: _t->on_okBtn_clicked(); break;
+        case 1: _t->on_cancelBtn_clicked(); break;
         default: ;
         }
-    } else if (_c == QMetaObject::IndexOfMethod) {
-        int *result = reinterpret_cast<int *>(_a[0]);
-        {
-            using _t = void (bidGrid::*)(QString );
-            if (*reinterpret_cast<_t *>(_a[1]) == static_cast<_t>(&bidGrid::sendBid)) {
-                *result = 0;
-                return;
-            }
-        }
     }
+    Q_UNUSED(_a);
 }
 
-QT_INIT_METAOBJECT const QMetaObject bidGrid::staticMetaObject = { {
+QT_INIT_METAOBJECT const QMetaObject LengthMenu::staticMetaObject = { {
     &QDialog::staticMetaObject,
-    qt_meta_stringdata_bidGrid.data,
-    qt_meta_data_bidGrid,
+    qt_meta_stringdata_LengthMenu.data,
+    qt_meta_data_LengthMenu,
     qt_static_metacall,
     nullptr,
     nullptr
 } };
 
 
-const QMetaObject *bidGrid::metaObject() const
+const QMetaObject *LengthMenu::metaObject() const
 {
     return QObject::d_ptr->metaObject ? QObject::d_ptr->dynamicMetaObject() : &staticMetaObject;
 }
 
-void *bidGrid::qt_metacast(const char *_clname)
+void *LengthMenu::qt_metacast(const char *_clname)
 {
     if (!_clname) return nullptr;
-    if (!strcmp(_clname, qt_meta_stringdata_bidGrid.stringdata0))
+    if (!strcmp(_clname, qt_meta_stringdata_LengthMenu.stringdata0))
         return static_cast<void*>(this);
     return QDialog::qt_metacast(_clname);
 }
 
-int bidGrid::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
+int LengthMenu::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
 {
     _id = QDialog::qt_metacall(_c, _id, _a);
     if (_id < 0)
@@ -130,13 +118,6 @@ int bidGrid::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
         _id -= 2;
     }
     return _id;
-}
-
-// SIGNAL 0
-void bidGrid::sendBid(QString _t1)
-{
-    void *_a[] = { nullptr, const_cast<void*>(reinterpret_cast<const void*>(&_t1)) };
-    QMetaObject::activate(this, &staticMetaObject, 0, _a);
 }
 QT_WARNING_POP
 QT_END_MOC_NAMESPACE

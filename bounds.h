@@ -1,13 +1,20 @@
 #ifndef BOUNDS_H
 #define BOUNDS_H
 
-typedef struct bounds
+class Bounds
 {
-    bounds();
-    bounds(int lower, int upper);
+public:
     int lower;
     int upper;
-}bounds;
+    int min_value;
+    int max_value;
+
+    Bounds();
+    Bounds(int min_value, int max_value);
+    int min(int a, int b);
+    int max(int a, int b);
+    void setBounds(int lower, int upper);
+};
 
 
 #endif // BOUNDS_H

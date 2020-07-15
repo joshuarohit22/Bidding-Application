@@ -7,10 +7,13 @@
 class PlayerInfo
 {
 public:
-    std::map <std::string, bounds > length;
-    struct bounds hcp;
+    std::map <char, Bounds > length;
+    Bounds hcp;
 
     PlayerInfo();
+    bool suitValid(char suit);
+    void setLength(char suit, int lower, int upper);
+    void setHcp(int lower, int upper);
 
 
 };

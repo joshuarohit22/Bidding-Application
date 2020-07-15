@@ -1,7 +1,10 @@
 #ifndef NODE_H
 #define NODE_H
 #include "playerinfo.h"
+#include "bid.h"
 #include <vector>
+
+//enum bidType {OPENING, DESCRIPTIVE, SIGNOFF, PREEMPTIVE, INVITATIONAL, FORCING, ASKING, TRANSFER, CUE, LEADDIRECTING};
 
 class Node
 {
@@ -9,7 +12,10 @@ public:
     PlayerInfo currInfo;
     int index;
     std::string changes;
-    std::string bid;
+    std::string bid_type;
+    std::string bid_info;
+    std::string comments;
+    Bid bid;
     std::string type;
     std::string typeInfo;
     std::vector <Node *> children;
@@ -18,12 +24,12 @@ public:
     bool saved;
     bool color;
 
-    Node(std::string bid, std::string changes);
+    Node(Bid Bid);
     void addNode(Node *newNode);
-    Node *getChild(std::string bid);
-    int saveChanges(std::string str);
-    std::vector <int> parseRange(std::string s);
-    void parseInput(std::string str);
+    Node *getChild(std::string bidStr);
+//    int saveChanges(std::string str);
+//    std::vector <int> parseRange(std::string s);
+//    void parseInput(std::string str);
 
 };
 

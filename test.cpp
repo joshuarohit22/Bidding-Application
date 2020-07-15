@@ -8,6 +8,8 @@
 #include <QHBoxLayout>
 #include <iostream>
 #include <QMainWindow>
+#include <QtSql/QSqlDatabase>
+#include <QtSql/QSqlQuery>
 #include <QToolBar>
 #include <assert.h>
 #include <queue>
@@ -18,6 +20,8 @@
 #include "ui_test.h"
 #include "bidgrid.h"
 #include "subtree.h"
+#include "inputmenu.h"
+#include "datainput.h"
 
 
 test::test(QWidget *parent)
@@ -43,9 +47,9 @@ test::test(QWidget *parent)
     outFileName = "";
     changesSaved = true;
 
-    root = new Node("", "");
+    root = new Node(Bid());
     currNode = root;
-    ui->parentInfoLabel->setText(QString::fromStdString("Parent Bid : " + currNode->bid + "\n Parent Info : " + currNode->changes));
+    ui->parentInfoLabel->setText(QString::fromStdString("Parent Bid : Root\n Parent Info : "));
 }
 
 test::~test()
@@ -75,27 +79,25 @@ void test::clearLayout(QLayout *layout)
 
 void test::addChildBid(QString str)
 {
+    changesSaved = false;
     chosenBid = str;
 
-    Node *newnode = new Node(str.toStdString(), "");
+    Node *newnode = new Node(Bid(str.toStdString()));
     currNode->addNode(newnode);
 
     QWidget *childWidget = new QWidget;
     QHBoxLayout *childLayout = new QHBoxLayout();
 
-    //adding bidlabel to childlayout
-    QLabel *bidLabel = new QLabel(chosenBid);
-    bidLabel->setObjectName(chosenBid);
-    childLayout->addWidget(bidLabel);
+    QPushButton *bidBtn = new QPushButton(chosenBid);
+    bidBtn->setObjectName(chosenBid);
+    QObject::connect(bidBtn, SIGNAL(clicked()), this, SLOT(onBidBtnClicked()));
+    childLayout->addWidget(bidBtn);
 
-    //adding line edit to childlayout
-    childLayout->addWidget(new QLineEdit());
-
-    //adding save Btn to childlayout
-    QPushButton *saveBtn = new QPushButton("Save");
-    saveBtn->setObjectName("Save");
-    QObject::connect(saveBtn, SIGNAL(clicked()), this, SLOT(onSaveBtnClicked()));
-    childLayout->addWidget(saveBtn);
+    //adding data btn to childlayout
+    QPushButton *dataBtn = new QPushButton("Data");
+    dataBtn->setObjectName("Data");
+    QObject::connect(dataBtn, SIGNAL(clicked()), this, SLOT(onDataBtnClicked()));
+    childLayout->addWidget(dataBtn);
 
     //adding delete Btn to childlayout
     QPushButton *delBtn = new QPushButton("Delete");
@@ -108,6 +110,157 @@ void test::addChildBid(QString str)
     saveLayout->addWidget(childWidget);
     ui->saveScrollContents->setLayout(saveLayout);
 }
+
+void test::onDataBtnClicked()
+{
+
+    changesSaved = false;
+
+    QPushButton *dataBtn = qobject_cast<QPushButton *>(sender());
+    QPushButton *bidBtn = nullptr , *delBtn = nullptr;
+    QList<QPushButton *> allPButtons = dataBtn->parentWidget()->findChildren<QPushButton *>();
+    QPushButton *btn;
+    foreach (btn, allPButtons)
+    {
+        if (btn->text() == QString("Delete"))
+        {
+            delBtn = btn;
+        }
+        else if (btn->text() == QString("Data"))
+        {
+            continue;
+        }
+        else
+        {
+            bidBtn = btn;
+        }
+    }
+
+
+    Node *currChild = currNode->getChild(bidBtn->text().toStdString());
+    DataInput *newWindow = new DataInput(currChild);
+    newWindow->show();
+
+}
+
+//void test::addOppPassChildBid(QString str)
+//{
+//    QPushButton *seqBtn = new QPushButton("Pass");
+//    QObject::connect(seqBtn, SIGNAL(clicked()), this, SLOT(onSeqBidBtnClicked()));
+//    seqLayout->addWidget(seqBtn);
+
+
+//    Node *newChildNode = new Node(Bid(str.toStdString()));
+//    currNode->addNode(newChildNode);
+//    std::cout << currNode->children.size() << std::endl;
+
+//    clearLayout(saveLayout);
+//    delete saveLayout;
+//    saveLayout = new QVBoxLayout();
+
+//    for (unsigned i = 0;i < currNode->children.size();++i)
+//    {
+//            QWidget *childWidget = new QWidget;
+//            QHBoxLayout *childLayout = new QHBoxLayout();
+
+//            //adding bid button to childlayout
+//            QPushButton *bidBtn = new QPushButton(QString::fromStdString(currNode->children[i]->bid.getBid()));
+//            bidBtn->setObjectName(QString::fromStdString(currNode->children[i]->bid.getBid()));
+//            QObject::connect(bidBtn, SIGNAL(clicked()), this, SLOT(onBidBtnClicked()));
+//            childLayout->addWidget(bidBtn);
+
+
+//            //adding line edit to childlayout
+//            QPushButton *dataBtn = new QPushButton("Data");
+//            dataBtn->setObjectName("Data");
+//            QObject::connect(dataBtn, SIGNAL(clicked()), this, SLOT(onDataBtnClicked()));
+//            childLayout->addWidget(dataBtn);
+
+
+//            //adding delete Btn to childlayout
+//            QPushButton *delBtn = new QPushButton("Delete");
+//            delBtn->setObjectName("Delete");
+//            QObject::connect(delBtn, SIGNAL(clicked()), this, SLOT(onDelBtnClicked()));
+//            childLayout->addWidget(delBtn);
+
+
+//            //setting layout to widget and adding to savelayout
+//            childWidget->setLayout(childLayout);
+
+//            saveLayout->addWidget(childWidget);
+//    }
+//    ui->saveScrollContents->setLayout(saveLayout);
+
+//}
+
+void test::on_opPassBtn_clicked()
+{
+
+    QPushButton *seqBtn = new QPushButton("Pass");
+    QObject::connect(seqBtn, SIGNAL(clicked()), this, SLOT(onSeqBidBtnClicked()));
+    seqLayout->addWidget(seqBtn);
+
+    Node *passChild = currNode->getChild("Pass");
+
+    if (passChild == nullptr)
+    {
+        Node *newnode = new Node(Bid("Pass"));
+        currNode->addNode(newnode);
+        currNode = newnode;
+    }
+    else
+    {
+        currNode = passChild;
+    }
+    bidSeq.push_back(currNode);
+
+
+    clearLayout(saveLayout);
+    delete saveLayout;
+    saveLayout = new QVBoxLayout();
+
+    for (unsigned i = 0;i < currNode->children.size();++i)
+    {
+            QWidget *childWidget = new QWidget;
+            QHBoxLayout *childLayout = new QHBoxLayout();
+
+            //adding bid button to childlayout
+            QPushButton *bidBtn = new QPushButton(QString::fromStdString(currNode->children[i]->bid.getBid()));
+            bidBtn->setObjectName(QString::fromStdString(currNode->children[i]->bid.getBid()));
+            QObject::connect(bidBtn, SIGNAL(clicked()), this, SLOT(onBidBtnClicked()));
+            childLayout->addWidget(bidBtn);
+
+
+            //adding line edit to childlayout
+            QPushButton *dataBtn = new QPushButton("Data");
+            dataBtn->setObjectName("Data");
+            QObject::connect(dataBtn, SIGNAL(clicked()), this, SLOT(onDataBtnClicked()));
+            childLayout->addWidget(dataBtn);
+
+
+            //adding delete Btn to childlayout
+            QPushButton *delBtn = new QPushButton("Delete");
+            delBtn->setObjectName("Delete");
+            QObject::connect(delBtn, SIGNAL(clicked()), this, SLOT(onDelBtnClicked()));
+            childLayout->addWidget(delBtn);
+
+
+            //setting layout to widget and adding to savelayout
+            childWidget->setLayout(childLayout);
+
+            saveLayout->addWidget(childWidget);
+    }
+    ui->saveScrollContents->setLayout(saveLayout);
+
+
+    bidGrid *newWindow = new bidGrid(bidSeq, currNode);
+    QObject::connect(newWindow, SIGNAL(sendBid(QString)), this, SLOT(addChildBid(QString)));
+    newWindow->setModal(true);
+    newWindow->exec();
+
+    return;
+}
+
 
 void test::on_addChildButton_clicked()
 {
@@ -140,7 +293,7 @@ void test::onSeqBidBtnClicked()
 
     currNode = bidSeq[bidSeq.size()-1];
 
-    ui->parentInfoLabel->setText(QString::fromStdString("Parent Bid : " + currNode->bid + "\n Parent Info : " + currNode->changes));
+    ui->parentInfoLabel->setText(QString::fromStdString("Parent Bid : " + currNode->bid.getBid() + "\n Parent Info : " + currNode->changes));
 
 
     clearLayout(saveLayout);
@@ -149,26 +302,22 @@ void test::onSeqBidBtnClicked()
 
     for (unsigned i = 0;i < currNode->children.size();++i)
     {
-        if (currNode->children[i]->saved == true)
-        {
             QWidget *childWidget = new QWidget;
             QHBoxLayout *childLayout = new QHBoxLayout();
 
             //adding bid button to childlayout
-            QPushButton *bidBtn = new QPushButton(QString::fromStdString(currNode->children[i]->bid));
-            bidBtn->setObjectName(QString::fromStdString(currNode->children[i]->bid));
+            QPushButton *bidBtn = new QPushButton(QString::fromStdString(currNode->children[i]->bid.getBid()));
+            bidBtn->setObjectName(QString::fromStdString(currNode->children[i]->bid.getBid()));
             QObject::connect(bidBtn, SIGNAL(clicked()), this, SLOT(onBidBtnClicked()));
             childLayout->addWidget(bidBtn);
 
-            //adding changes label to childlayout
-            QLabel *childText = new QLabel(QString::fromStdString(currNode->children[i]->changes));
-            childLayout->addWidget(childText);
 
-            //adding modify Btn to childlayout
-            QPushButton *modifyBtn = new QPushButton("Modify");
-            modifyBtn->setObjectName("Modify");
-            QObject::connect(modifyBtn, SIGNAL(clicked()), this, SLOT(onModifyBtnClicked()));
-            childLayout->addWidget(modifyBtn);
+            //adding line edit to childlayout
+            QPushButton *dataBtn = new QPushButton("Data");
+            dataBtn->setObjectName("Data");
+            QObject::connect(dataBtn, SIGNAL(clicked()), this, SLOT(onDataBtnClicked()));
+            childLayout->addWidget(dataBtn);
+
 
             //adding delete Btn to childlayout
             QPushButton *delBtn = new QPushButton("Delete");
@@ -181,39 +330,6 @@ void test::onSeqBidBtnClicked()
             childWidget->setLayout(childLayout);
 
             saveLayout->addWidget(childWidget);
-        }
-        else
-        {
-            QWidget *childWidget = new QWidget;
-            QHBoxLayout *childLayout = new QHBoxLayout();
-
-            //adding bid label to childlayout
-            QLabel *bidLabel = new QLabel(QString::fromStdString(currNode->children[i]->bid));
-            childLayout->addWidget(bidLabel);
-
-            //adding changes label to childlayout
-            QLineEdit *childText = new QLineEdit(QString::fromStdString(currNode->children[i]->changes));
-            childLayout->addWidget(childText);
-
-            //adding save Btn to childlayout
-            QPushButton *saveBtn = new QPushButton("Save");
-            saveBtn->setObjectName("Save");
-            QObject::connect(saveBtn, SIGNAL(clicked()), this, SLOT(onSaveBtnClicked()));
-            childLayout->addWidget(saveBtn);
-
-            //adding delete Btn to childlayout
-            QPushButton *delBtn = new QPushButton("Delete");
-            delBtn->setObjectName("Delete");
-            QObject::connect(delBtn, SIGNAL(clicked()), this, SLOT(onDelBtnClicked()));
-            childLayout->addWidget(delBtn);
-
-
-            //setting layout to widget and adding to savelayout
-            childWidget->setLayout(childLayout);
-
-            saveLayout->addWidget(childWidget);
-
-        }
     }
 
     ui->saveScrollContents->setLayout(saveLayout);
@@ -232,7 +348,7 @@ void test::onBidBtnClicked()
     currNode = currNode->getChild(bidBtn->text().toStdString());
     bidSeq.push_back(currNode);
 
-    ui->parentInfoLabel->setText(QString::fromStdString("Parent Bid : " + currNode->bid + "\n Parent Info : " + currNode->changes));
+    ui->parentInfoLabel->setText(QString::fromStdString("Parent Bid : " + currNode->bid.getBid() + "\n Parent Info : " + currNode->changes));
 
     clearLayout(saveLayout);
     delete saveLayout;
@@ -240,26 +356,20 @@ void test::onBidBtnClicked()
 
     for (unsigned i = 0;i < currNode->children.size();++i)
     {
-        if (currNode->children[i]->saved == true)
-        {
             QWidget *childWidget = new QWidget;
             QHBoxLayout *childLayout = new QHBoxLayout();
 
             //adding bid button to childlayout
-            QPushButton *bidBtn = new QPushButton(QString::fromStdString(currNode->children[i]->bid));
-            bidBtn->setObjectName(QString::fromStdString(currNode->children[i]->bid));
+            QPushButton *bidBtn = new QPushButton(QString::fromStdString(currNode->children[i]->bid.getBid()));
+            bidBtn->setObjectName(QString::fromStdString(currNode->children[i]->bid.getBid()));
             QObject::connect(bidBtn, SIGNAL(clicked()), this, SLOT(onBidBtnClicked()));
             childLayout->addWidget(bidBtn);
 
-            //adding changes label to childlayout
-            QLabel *childText = new QLabel(QString::fromStdString(currNode->children[i]->changes));
-            childLayout->addWidget(childText);
-
-            //adding modify Btn to childlayout
-            QPushButton *modifyBtn = new QPushButton("Modify");
-            modifyBtn->setObjectName("Modify");
-            QObject::connect(modifyBtn, SIGNAL(clicked()), this, SLOT(onModifyBtnClicked()));
-            childLayout->addWidget(modifyBtn);
+            //adding line edit to childlayout
+            QPushButton *dataBtn = new QPushButton("Data");
+            dataBtn->setObjectName("Data");
+            QObject::connect(dataBtn, SIGNAL(clicked()), this, SLOT(onDataBtnClicked()));
+            childLayout->addWidget(dataBtn);
 
             //adding delete Btn to childlayout
             QPushButton *delBtn = new QPushButton("Delete");
@@ -272,90 +382,12 @@ void test::onBidBtnClicked()
             childWidget->setLayout(childLayout);
 
             saveLayout->addWidget(childWidget);
-        }
-        else
-        {
-            QWidget *childWidget = new QWidget;
-            QHBoxLayout *childLayout = new QHBoxLayout();
-
-            //adding bid label to childlayout
-            QLabel *bidLabel = new QLabel(QString::fromStdString(currNode->children[i]->bid));
-            childLayout->addWidget(bidLabel);
-
-            //adding changes line edit to childlayout
-            QLineEdit *childText = new QLineEdit(QString::fromStdString(currNode->children[i]->changes));
-            childLayout->addWidget(childText);
-
-            //adding save Btn to childlayout
-            QPushButton *saveBtn = new QPushButton("Save");
-            saveBtn->setObjectName("Save");
-            QObject::connect(saveBtn, SIGNAL(clicked()), this, SLOT(onSaveBtnClicked()));
-            childLayout->addWidget(saveBtn);
-
-            //adding delete Btn to childlayout
-            QPushButton *delBtn = new QPushButton("Delete");
-            delBtn->setObjectName("Delete");
-            QObject::connect(delBtn, SIGNAL(clicked()), this, SLOT(onDelBtnClicked()));
-            childLayout->addWidget(delBtn);
-
-
-            //setting layout to widget and adding to savelayout
-            childWidget->setLayout(childLayout);
-
-            saveLayout->addWidget(childWidget);
-
-        }
     }
 
     ui->saveScrollContents->setLayout(saveLayout);
 }
 
-void test::onSaveBtnClicked()
-{       
-    QPushButton *saveBtn = qobject_cast<QPushButton *>(sender());
-    QList <QPushButton *> allPButtons = saveBtn->parentWidget()->findChildren<QPushButton *>();
 
-    //checking if syntax is correct;
-    QLineEdit *lineEdit = saveBtn->parentWidget()->findChild<QLineEdit *>();
-    QLabel *bidLabel = saveBtn->parentWidget()->findChild<QLabel *>();
-    QString inpText = lineEdit->text();
-
-    Node *newnode = currNode->getChild(bidLabel->text().toStdString());
-    int response = newnode->saveChanges(inpText.toStdString());
-    std::cout << response << std::endl;
-    if (response == 0) //syntax error of inpText
-    {
-        showErrorMsg(QString("syntax error"));
-        return;
-    }
-
-
-    //replacing label of bid with button of bid
-    QPushButton *bidBtn = new QPushButton(bidLabel->text());
-    saveBtn->parentWidget()->layout()->replaceWidget(bidLabel, bidBtn);
-    QObject::connect(bidBtn, SIGNAL(clicked()), this, SLOT(onBidBtnClicked()));
-    delete bidLabel;
-
-    //replacing linedit with label and same text
-    if (inpText == QString(""))
-    {
-        inpText = QString("NIL");
-    }
-    QLabel *viewLabel = new QLabel(inpText);
-    saveBtn->parentWidget()->layout()->replaceWidget(lineEdit, viewLabel);
-    delete lineEdit;
-
-    //replacing save button with modify button
-    QPushButton *modifyBtn = new QPushButton("Modify");
-    modifyBtn->setObjectName("Modify");
-    saveBtn->parentWidget()->layout()->replaceWidget(saveBtn, modifyBtn);
-    QObject::connect(modifyBtn, SIGNAL(clicked()), this, SLOT(onModifyBtnClicked()));
-
-
-    changesSaved = false;
-    delete saveBtn;
-
-}
 
 void deleteSubTree(Node *node)
 {
@@ -371,63 +403,6 @@ void deleteSubTree(Node *node)
     return;
 }
 
-void test::onModifyBtnClicked()
-{
-    QPushButton *modifyBtn = qobject_cast<QPushButton *>(sender());
-
-    QLabel *viewLabel = modifyBtn->parentWidget()->findChild<QLabel *>();
-
-    //finding delete button and bid button
-    QPushButton *delBtn, *bidBtn;
-    QList<QPushButton *> allPButtons = modifyBtn->parentWidget()->findChildren<QPushButton *>();
-    QPushButton *btn;
-    foreach (btn, allPButtons)
-    {
-        if (btn->text() == QString("Delete"))
-        {
-            delBtn = btn;
-        }
-        else if (btn->text() == QString("Modify"))
-        {
-            continue;
-        }
-        else
-        {
-            bidBtn = btn;
-        }
-    }
-
-    Node *toModChild = currNode->getChild(bidBtn->text().toStdString());
-
-    toModChild->saved = false;
-
-    //replacing bid button with bid label
-    changesSaved = false;
-    if (bidBtn)
-    {
-        QLabel *bidLabel = new QLabel(bidBtn->text());
-        modifyBtn->parentWidget()->layout()->replaceWidget(bidBtn, bidLabel);
-        delete bidBtn;
-    }
-
-
-    //replacing label with lineEdit
-    if (viewLabel)
-    {
-        QLineEdit *lineEdit = new QLineEdit(viewLabel->text());
-        modifyBtn->parentWidget()->layout()->replaceWidget(viewLabel, lineEdit);
-        delete viewLabel;
-    }
-
-    //replacing modify button with save button
-    QPushButton *saveBtn = new QPushButton("Save");
-    QObject::connect(saveBtn, SIGNAL(clicked()), this, SLOT(onSaveBtnClicked()));
-    modifyBtn->parentWidget()->layout()->replaceWidget(modifyBtn, saveBtn);
-
-
-    delete modifyBtn;
-
-}
 
 
 void test::onDelBtnClicked()
@@ -436,18 +411,14 @@ void test::onDelBtnClicked()
 
     QWidget *parWidget = delBtn->parentWidget();
 
-    QPushButton *modifyBtn = nullptr, *bidBtn = nullptr, *saveBtn = nullptr;
+    QPushButton *dataBtn = nullptr, *bidBtn = nullptr;
     QList<QPushButton *> allPButtons = parWidget->findChildren<QPushButton *>();
     QPushButton *btn;
     foreach (btn, allPButtons)
     {
-        if (btn->text() == QString("Modify"))
+        if (btn->text() == QString("Data"))
         {
-            modifyBtn = btn;
-        }
-        else if (btn->text() == QString("Save"))
-        {
-            saveBtn = btn;
+            dataBtn = btn;
         }
         else if (btn->text() == QString("Delete"))
         {
@@ -550,7 +521,6 @@ void test::onDelBtnClicked()
 }
 
 
-
 void test::showErrorMsg(QString s)
 {
     error_msg.setText(s);
@@ -628,89 +598,70 @@ void test::on_LoadFile_clicked()
         }
     }
 
-    QString fileName = QFileDialog::getOpenFileName(this,tr("Open Bidding tree"), "",tr("Bidding Tree (*.bt);;All Files (*)"));
+    QString fileName = QFileDialog::getOpenFileName(this,tr("Open Bidding Graph"), "",tr("Bidding Graph (*.db);;All Files (*)"));
 
-    std::string fname = fileName.toStdString();
-    outFileName = fname;
-    std::ifstream fin;
-    fin.open(fname);
-    std::string line = "";
-
-    int n;
-
-    std::vector <std::string> tree;
-
+    QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");
+    db.setHostName("yjr");
+    db.setDatabaseName(fileName);
+    db.setUserName("joshua");
+    db.setPassword("j");
+    bool ok = db.open();
     Node **data;
-    if (fin.is_open())
+    if (ok)
     {
+        int n;
+        QSqlQuery queryStructure;
+        QSqlQuery queryNode;
 
-        getline(fin, line);
-        n = stoi(line);
-        std::cout << "n = " << n << std::endl;
+        QSqlQuery query;
+        query.exec("Select COUNT(*) from Node;");
+        query.next();
+        n = query.value(0).toInt();
+        std::cout << "Load file n = " << n << std::endl;
+
+        queryStructure.exec("SELECT * from Structure;");
+        queryNode.exec("Select * from Node;");
+
+
 
         data = (Node **)malloc(n*sizeof(Node *));
 
-        std::string bid, changes, index;
-        bool saved;
+        int index = -1;
 
-        while (getline(fin, line))
+        while (queryNode.next())
         {
-            line.erase(std::remove(line.begin(),line.end(), '\n'), line.end());
-            if (line == "")
-                break;
-            tree.push_back(line);
+            index = queryNode.value(0).toInt();
+            std::cout << "index = " << index << std::endl;
+
+            std::cout << "comments: " << queryNode.value(13).toString().toStdString() << " Bid: " << queryNode.value(14).toString().toStdString() << std::endl;
+            Node *newnode = new Node(Bid(queryNode.value(14).toString().toStdString()));
+            data[index] = newnode;
+
+            data[index]->currInfo.setLength('C', queryNode.value(1).toInt(), queryNode.value(2).toInt());
+            data[index]->currInfo.setLength('D', queryNode.value(3).toInt(), queryNode.value(4).toInt());
+            data[index]->currInfo.setLength('H', queryNode.value(5).toInt(), queryNode.value(6).toInt());
+            data[index]->currInfo.setLength('S', queryNode.value(7).toInt(), queryNode.value(8).toInt());
+            data[index]->currInfo.setHcp(queryNode.value(9).toInt(), queryNode.value(10).toInt());
+            data[index]->bid_type = queryNode.value(11).toString().toStdString();
+            data[index]->bid_info = queryNode.value(12).toString().toStdString();
+            data[index]->comments = queryNode.value(13).toString().toStdString();
         }
 
-        while (getline(fin, line))
+        int parentID, childID;
+
+        while (queryStructure.next())
         {
+            parentID = queryStructure.value(0).toInt();
+            childID = queryStructure.value(1).toInt();
+            std::cout << "parent id: " << parentID << " childID: " << childID << std::endl;
 
-            line.erase(std::remove(line.begin(),line.end(), '\n'), line.end());
-            std::string toErase = "Node: ";
-            line.erase(0, toErase.length());
-            index = line;
-
-
-            getline(fin, line);
-            line.erase(std::remove(line.begin(),line.end(), '\n'), line.end());
-            toErase = "bid: ";
-            line.erase(0, toErase.length());
-            bid = line;
-
-            getline(fin, line);
-            line.erase(std::remove(line.begin(),line.end(), '\n'), line.end());
-            toErase = "saved: ";
-            line.erase(0, toErase.length());
-            saved = (line == "1");
-
-            getline(fin, line);
-            line.erase(std::remove(line.begin(),line.end(), '\n'), line.end());
-            toErase = "changes: ";
-            line.erase(0, toErase.length());
-            changes = line;
-
-            Node *newnode = new Node(bid, changes);
-            newnode->saved = saved;
-
-            data[stoi(index)] = newnode;
-
-            getline(fin, line);
-
-        }
-
-        std::vector <int> out;
-        for (auto s : tree)
-        {
-            out = getint(s);
-
-
-            for (unsigned i = 1; i < out.size(); ++i)
-                data[out[0]]->children.push_back(data[out[i]]);
+            data[parentID]->children.push_back(data[childID]);
         }
 
         root = data[0];
         currNode = root;
 
-        ui->parentInfoLabel->setText(QString::fromStdString("Parent Bid : " + currNode->bid + ".\n Parent Info : " + currNode->changes + "."));
+        ui->parentInfoLabel->setText(QString::fromStdString("Parent Bid : Root.\n Parent Info : "));
 
         //clearing ui
         clearLayout(saveLayout);
@@ -724,81 +675,43 @@ void test::on_LoadFile_clicked()
 
         for (unsigned i = 0;i < currNode->children.size();++i)
         {
-            if (currNode->children[i]->saved == true)
-            {
-                QWidget *childWidget = new QWidget;
-                QHBoxLayout *childLayout = new QHBoxLayout();
+            QWidget *childWidget = new QWidget;
+            QHBoxLayout *childLayout = new QHBoxLayout();
 
-                //adding bid button to childlayout
-                QPushButton *bidBtn = new QPushButton(QString::fromStdString(currNode->children[i]->bid));
-                bidBtn->setObjectName(QString::fromStdString(currNode->children[i]->bid));
-                QObject::connect(bidBtn, SIGNAL(clicked()), this, SLOT(onBidBtnClicked()));
-                childLayout->addWidget(bidBtn);
+            //adding bid button to childlayout
+            QPushButton *bidBtn = new QPushButton(QString::fromStdString(currNode->children[i]->bid.getBid()));
+            bidBtn->setObjectName(QString::fromStdString(currNode->children[i]->bid.getBid()));
+            QObject::connect(bidBtn, SIGNAL(clicked()), this, SLOT(onBidBtnClicked()));
+            childLayout->addWidget(bidBtn);
 
-                //adding changes label to childlayout
-                QLabel *childText = new QLabel(QString::fromStdString(currNode->children[i]->changes));
-                childLayout->addWidget(childText);
+            //adding line edit to childlayout
+            QPushButton *dataBtn = new QPushButton("Data");
+            dataBtn->setObjectName("Data");
+            QObject::connect(dataBtn, SIGNAL(clicked()), this, SLOT(onDataBtnClicked()));
+            childLayout->addWidget(dataBtn);
 
-                //adding modify Btn to childlayout
-                QPushButton *modifyBtn = new QPushButton("Modify");
-                modifyBtn->setObjectName("Modify");
-                QObject::connect(modifyBtn, SIGNAL(clicked()), this, SLOT(onModifyBtnClicked()));
-                childLayout->addWidget(modifyBtn);
-
-                //adding delete Btn to childlayout
-                QPushButton *delBtn = new QPushButton("Delete");
-                delBtn->setObjectName("Delete");
-                QObject::connect(delBtn, SIGNAL(clicked()), this, SLOT(onDelBtnClicked()));
-                childLayout->addWidget(delBtn);
+            //adding delete Btn to childlayout
+            QPushButton *delBtn = new QPushButton("Delete");
+            delBtn->setObjectName("Delete");
+            QObject::connect(delBtn, SIGNAL(clicked()), this, SLOT(onDelBtnClicked()));
+            childLayout->addWidget(delBtn);
 
 
-                //setting layout to widget and adding to savelayout
-                childWidget->setLayout(childLayout);
+            //setting layout to widget and adding to savelayout
+            childWidget->setLayout(childLayout);
 
-                saveLayout->addWidget(childWidget);
-            }
-            else
-            {
-                QWidget *childWidget = new QWidget;
-                QHBoxLayout *childLayout = new QHBoxLayout();
-
-                //adding bid label to childlayout
-                QLabel *bidLabel = new QLabel(QString::fromStdString(currNode->children[i]->bid));
-                childLayout->addWidget(bidLabel);
-
-                //adding changes line edit to childlayout
-                QLineEdit *childText = new QLineEdit(QString::fromStdString(currNode->children[i]->changes));
-                childLayout->addWidget(childText);
-
-                //adding save Btn to childlayout
-                QPushButton *saveBtn = new QPushButton("Save");
-                saveBtn->setObjectName("Save");
-                QObject::connect(saveBtn, SIGNAL(clicked()), this, SLOT(onSaveBtnClicked()));
-                childLayout->addWidget(saveBtn);
-
-                //adding delete Btn to childlayout
-                QPushButton *delBtn = new QPushButton("Delete");
-                delBtn->setObjectName("Delete");
-                QObject::connect(delBtn, SIGNAL(clicked()), this, SLOT(onDelBtnClicked()));
-                childLayout->addWidget(delBtn);
-
-
-                //setting layout to widget and adding to savelayout
-                childWidget->setLayout(childLayout);
-
-                saveLayout->addWidget(childWidget);
-
-            }
+            saveLayout->addWidget(childWidget);
         }
 
         ui->saveScrollContents->setLayout(saveLayout);
 
         changesSaved = true;
 
-        fin.close();
+
     }
-    else
-        std::cout << "Unable to open file" << std::endl;
+
+
+
 
     return;
 
@@ -830,23 +743,46 @@ void test::on_SaveFile_clicked()
 
     if (outFileName == "")
     {
-        QString fileName = QFileDialog::getSaveFileName(this,tr("Save Bidding tree"), "",tr("Bidding Tree (*.bt);;All Files (*)"));
+        QString fileName = QFileDialog::getSaveFileName(this,tr("Save Bidding Graph"), "",tr("Bidding Graph (*.db);;All Files (*)"));
         fname = fileName.toStdString();
+        outFileName = fname;
     }
     else
     {
         fname = outFileName;
     }
-    std::ofstream fout;
-    fout.open(fname, std::ofstream::out | std::ofstream::trunc);
 
-    if (fout.is_open())
+    if (fname == "")
+        return;
+
+    QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");
+    db.setHostName("yjr");
+    db.setDatabaseName(QString::fromStdString(fname));
+    db.setUserName("joshua");
+    db.setPassword("j");
+    bool ok = db.open();
+
+    if (ok)
     {
         changesSaved = true;
+        std::cout << "db opened " << fname << std::endl;
 
-        int currIndex = 0;
+        QSqlQuery query;
+
+        query.exec("DROP TABLE IF EXISTS Node;");
+        query.exec("DROP TABLE IF EXISTS Structure;");
+
+        query.exec("CREATE TABLE IF NOT EXISTS Structure(ParentID INTEGER, ChildID INTEGER);");
+
+        query.exec("CREATE TABLE IF NOT EXISTS Node(NodeID INTEGER, clubs_lower_bound INTEGER, clubs_upper_bound INTEGER,"
+                   "diamonds_lower_bound INTEGER, diamonds_upper_bound INTEGER,"
+                   "hearts_lower_bound INTEGER, hearts_upper_bound INTEGER,"
+                   "spades_lower_bound INTEGER, spades_upper_bound INTEGER,"
+                   "hcp_lower_bound INTEGER, hcp_upper_bound INTEGER,"
+                   "bid_type TEXT, bid_info TEXT, comments TEXT, bid TEXT);");
 
         removeColors(root);
+        int currIndex = 0;
         std::queue <Node *> q;
         q.push(root);
         Node *cnode;
@@ -864,9 +800,9 @@ void test::on_SaveFile_clicked()
             }
         }
 
-        fout << currIndex << "\n";
-
         removeColors(root);
+        int parentID = 0;
+        int childID = 0;
         q.push(root);
         while(!q.empty())
         {
@@ -877,18 +813,20 @@ void test::on_SaveFile_clicked()
                 cnode->color = true;
                 if (cnode->children.size() != 0)
                 {
-                    fout << cnode->index << " ";
+                    parentID = cnode->index;
                     for (auto n : cnode->children)
                     {
-                        fout << n->index << " ";
+                        childID = n->index;
+                        std::cout << "saving parentid: " << parentID << " childID: " << childID << std::endl;
+                        query.prepare("INSERT INTO Structure(ParentID, ChildID) VALUES(?, ?);");
+                        query.addBindValue(parentID);
+                        query.addBindValue(childID);
+                        query.exec();
                         q.push(n);
                     }
-                    fout << "\n";
                 }
             }
         }
-
-        fout << "\n";
 
         removeColors(root);
         q.push(root);
@@ -899,19 +837,49 @@ void test::on_SaveFile_clicked()
             if (cnode->color == false)
             {
                 cnode->color = true;
-                fout << "Node: " << cnode->index << "\n";
-                fout << "bid: " << cnode->bid << "\n";
-                fout << "saved: " << cnode->saved << "\n";
-                fout << "changes: " << cnode->changes << "\n\n";
+                query.prepare("INSERT INTO Node(NodeID, clubs_lower_bound, clubs_upper_bound,"
+                              "diamonds_lower_bound, diamonds_upper_bound,"
+                              "hearts_lower_bound, hearts_upper_bound,"
+                              "spades_lower_bound, spades_upper_bound,"
+                              "hcp_lower_bound, hcp_upper_bound,"
+                              "bid_type, bid_info, comments, bid) "
+                              "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);");
+
+                query.addBindValue(cnode->index);
+                query.addBindValue(cnode->currInfo.length['C'].lower);
+                query.addBindValue(cnode->currInfo.length['C'].upper);
+                query.addBindValue(cnode->currInfo.length['D'].lower);
+                query.addBindValue(cnode->currInfo.length['D'].upper);
+                query.addBindValue(cnode->currInfo.length['H'].lower);
+                query.addBindValue(cnode->currInfo.length['H'].upper);
+                query.addBindValue(cnode->currInfo.length['S'].lower);
+                query.addBindValue(cnode->currInfo.length['S'].upper);
+                query.addBindValue(cnode->currInfo.hcp.lower);
+                query.addBindValue(cnode->currInfo.hcp.upper);
+                query.addBindValue(QString::fromStdString(cnode->bid_type));
+                query.addBindValue(QString::fromStdString(cnode->bid_info));
+                query.addBindValue(QString::fromStdString(cnode->comments));
+                query.addBindValue(QString::fromStdString(cnode->bid.getBid()));
+                query.exec();
 
                 for (auto n : cnode->children)
                     q.push(n);
             }
         }
+        QSqlQuery queryNode;
+        queryNode.exec("Select * from Node;");
 
-        fout.close();
+        while (queryNode.next())
+        {
+            std::cout << "Comments: " << queryNode.value(13).toString().toStdString() << " bid:" << queryNode.value(14).toString().toStdString() << std::endl;
+        }
 
     }
+
+
+
+
+
 
     return;
 }
@@ -940,26 +908,21 @@ void test::on_root_clicked()
 
     for (unsigned i = 0;i < currNode->children.size();++i)
     {
-        if (currNode->children[i]->saved == true)
-        {
             QWidget *childWidget = new QWidget;
             QHBoxLayout *childLayout = new QHBoxLayout();
 
             //adding bid button to childlayout
-            QPushButton *bidBtn = new QPushButton(QString::fromStdString(currNode->children[i]->bid));
-            bidBtn->setObjectName(QString::fromStdString(currNode->children[i]->bid));
+            QPushButton *bidBtn = new QPushButton(QString::fromStdString(currNode->children[i]->bid.getBid()));
+            bidBtn->setObjectName(QString::fromStdString(currNode->children[i]->bid.getBid()));
             QObject::connect(bidBtn, SIGNAL(clicked()), this, SLOT(onBidBtnClicked()));
             childLayout->addWidget(bidBtn);
 
-            //adding changes label to childlayout
-            QLabel *childText = new QLabel(QString::fromStdString(currNode->children[i]->changes));
-            childLayout->addWidget(childText);
 
-            //adding modify Btn to childlayout
-            QPushButton *modifyBtn = new QPushButton("Modify");
-            modifyBtn->setObjectName("Modify");
-            QObject::connect(modifyBtn, SIGNAL(clicked()), this, SLOT(onModifyBtnClicked()));
-            childLayout->addWidget(modifyBtn);
+            //adding data btn to childlayout
+            QPushButton *dataBtn = new QPushButton("Data");
+            dataBtn->setObjectName("Data");
+            QObject::connect(dataBtn, SIGNAL(clicked()), this, SLOT(onDataBtnClicked()));
+            childLayout->addWidget(dataBtn);
 
             //adding delete Btn to childlayout
             QPushButton *delBtn = new QPushButton("Delete");
@@ -972,45 +935,12 @@ void test::on_root_clicked()
             childWidget->setLayout(childLayout);
 
             saveLayout->addWidget(childWidget);
-        }
-        else
-        {
-            QWidget *childWidget = new QWidget;
-            QHBoxLayout *childLayout = new QHBoxLayout();
-
-            //adding bid label to childlayout
-            QLabel *bidLabel = new QLabel(QString::fromStdString(currNode->children[i]->bid));
-            childLayout->addWidget(bidLabel);
-
-            //adding changes label to childlayout
-            QLineEdit *childText = new QLineEdit(QString::fromStdString(currNode->children[i]->changes));
-            childLayout->addWidget(childText);
-
-            //adding save Btn to childlayout
-            QPushButton *saveBtn = new QPushButton("Save");
-            saveBtn->setObjectName("Save");
-            QObject::connect(saveBtn, SIGNAL(clicked()), this, SLOT(onSaveBtnClicked()));
-            childLayout->addWidget(saveBtn);
-
-            //adding delete Btn to childlayout
-            QPushButton *delBtn = new QPushButton("Delete");
-            delBtn->setObjectName("Delete");
-            QObject::connect(delBtn, SIGNAL(clicked()), this, SLOT(onDelBtnClicked()));
-            childLayout->addWidget(delBtn);
-
-
-            //setting layout to widget and adding to savelayout
-            childWidget->setLayout(childLayout);
-
-            saveLayout->addWidget(childWidget);
-
-        }
     }
 
 
     ui->saveScrollContents->setLayout(saveLayout);
 
-    ui->parentInfoLabel->setText(QString::fromStdString("Parent Bid : " + currNode->bid + "\n Parent Info : " + currNode->changes));
+    ui->parentInfoLabel->setText(QString::fromStdString("Parent Bid : Root\n Parent Info : "));
 
 
     return;
@@ -1043,7 +973,7 @@ void test::on_newFile_clicked()
         }
     }
 
-    QString fileName = QFileDialog::getSaveFileName(this,tr("Save Bidding tree"), "",tr("Bidding Tree (*.bt);;All Files (*)"));
+    QString fileName = QFileDialog::getSaveFileName(this,tr("Save Bidding Graph"), "",tr("Bidding Graph (*.bd);;All Files (*)"));
     outFileName = fileName.toStdString();
 
     //clearing ui
@@ -1057,9 +987,9 @@ void test::on_newFile_clicked()
     seqLayout = new QHBoxLayout();
     ui->seqScrollContents->setLayout(seqLayout);
 
-    root = new Node("", "");
+    root = new Node(Bid());
     currNode = root;
-    ui->parentInfoLabel->setText(QString::fromStdString("Parent Bid : " + currNode->bid + "\n Parent Info : " + currNode->changes));
+    ui->parentInfoLabel->setText(QString::fromStdString("Parent Bid : " + currNode->bid.getBid() + "\n Parent Info : " + currNode->changes));
 
 }
 
@@ -1080,20 +1010,27 @@ void test::addSubTree(Node *subtreeNode)
     QHBoxLayout *childLayout = new QHBoxLayout();
 
     //adding bidBtn to childlayout
-    QPushButton *bidBtn = new QPushButton(QString::fromStdString(subtreeNode->bid));
-    bidBtn->setObjectName(QString::fromStdString(subtreeNode->bid));
+    QPushButton *bidBtn = new QPushButton(QString::fromStdString(subtreeNode->bid.getBid()));
+    bidBtn->setObjectName(QString::fromStdString(subtreeNode->bid.getBid()));
     QObject::connect(bidBtn, SIGNAL(clicked()), this, SLOT(onBidBtnClicked()));
     childLayout->addWidget(bidBtn);
 
-    //adding label to childlayout
-    QLabel *childText = new QLabel(QString::fromStdString(subtreeNode->changes));
-    childLayout->addWidget(childText);
+//    //adding label to childlayout
+//    QLabel *childText = new QLabel(QString::fromStdString(subtreeNode->changes));
+//    childLayout->addWidget(childText);
 
-    //adding modify Btn to childlayout
-    QPushButton *modifyBtn = new QPushButton("Modify");
-    modifyBtn->setObjectName("Modify");
-    QObject::connect(modifyBtn, SIGNAL(clicked()), this, SLOT(onModifyBtnClicked()));
-    childLayout->addWidget(modifyBtn);
+//    //adding modify Btn to childlayout
+//    QPushButton *modifyBtn = new QPushButton("Modify");
+//    modifyBtn->setObjectName("Modify");
+//    QObject::connect(modifyBtn, SIGNAL(clicked()), this, SLOT(onModifyBtnClicked()));
+//    childLayout->addWidget(modifyBtn);
+
+    //adding line edit to childlayout
+    QPushButton *dataBtn = new QPushButton("Data");
+    dataBtn->setObjectName("Data");
+    QObject::connect(dataBtn, SIGNAL(clicked()), this, SLOT(onDataBtnClicked()));
+    childLayout->addWidget(dataBtn);
+
 
     //adding delete Btn to childlayout
     QPushButton *delBtn = new QPushButton("Delete");
@@ -1106,5 +1043,113 @@ void test::addSubTree(Node *subtreeNode)
     saveLayout->addWidget(childWidget);
     ui->saveScrollContents->setLayout(saveLayout);
 
+
+}
+
+
+
+void test::onModifyBtnClicked()
+{
+    QPushButton *modifyBtn = qobject_cast<QPushButton *>(sender());
+
+    QLabel *viewLabel = modifyBtn->parentWidget()->findChild<QLabel *>();
+
+    //finding delete button and bid button
+    QPushButton *delBtn, *bidBtn;
+    QList<QPushButton *> allPButtons = modifyBtn->parentWidget()->findChildren<QPushButton *>();
+    QPushButton *btn;
+    foreach (btn, allPButtons)
+    {
+        if (btn->text() == QString("Delete"))
+        {
+            delBtn = btn;
+        }
+        else if (btn->text() == QString("Modify"))
+        {
+            continue;
+        }
+        else
+        {
+            bidBtn = btn;
+        }
+    }
+
+    Node *toModChild = currNode->getChild(bidBtn->text().toStdString());
+
+    toModChild->saved = false;
+
+    //replacing bid button with bid label
+    changesSaved = false;
+    if (bidBtn)
+    {
+        QLabel *bidLabel = new QLabel(bidBtn->text());
+        modifyBtn->parentWidget()->layout()->replaceWidget(bidBtn, bidLabel);
+        delete bidBtn;
+    }
+
+
+    //replacing label with lineEdit
+    if (viewLabel)
+    {
+        QLineEdit *lineEdit = new QLineEdit(viewLabel->text());
+        modifyBtn->parentWidget()->layout()->replaceWidget(viewLabel, lineEdit);
+        delete viewLabel;
+    }
+
+    //replacing modify button with save button
+    QPushButton *saveBtn = new QPushButton("Save");
+    QObject::connect(saveBtn, SIGNAL(clicked()), this, SLOT(onSaveBtnClicked()));
+    modifyBtn->parentWidget()->layout()->replaceWidget(modifyBtn, saveBtn);
+
+
+    delete modifyBtn;
+
+}
+
+void test::onSaveBtnClicked()
+{
+    QPushButton *saveBtn = qobject_cast<QPushButton *>(sender());
+    QList <QPushButton *> allPButtons = saveBtn->parentWidget()->findChildren<QPushButton *>();
+
+    //checking if syntax is correct;
+    QLineEdit *lineEdit = saveBtn->parentWidget()->findChild<QLineEdit *>();
+    QLabel *bidLabel = saveBtn->parentWidget()->findChild<QLabel *>();
+    QString inpText = lineEdit->text();
+
+    Node *newnode = currNode->getChild(bidLabel->text().toStdString());
+//    int response = newnode->saveChanges(inpText.toStdString());
+    int response = 1;
+    std::cout << response << std::endl;
+    if (response == 0) //syntax error of inpText
+    {
+        showErrorMsg(QString("syntax error"));
+        return;
+    }
+
+
+    //replacing label of bid with button of bid
+    QPushButton *bidBtn = new QPushButton(bidLabel->text());
+    saveBtn->parentWidget()->layout()->replaceWidget(bidLabel, bidBtn);
+    QObject::connect(bidBtn, SIGNAL(clicked()), this, SLOT(onBidBtnClicked()));
+    delete bidLabel;
+
+    //replacing linedit with label and same text
+    if (inpText == QString(""))
+    {
+        inpText = QString("NIL");
+    }
+    QLabel *viewLabel = new QLabel(inpText);
+    saveBtn->parentWidget()->layout()->replaceWidget(lineEdit, viewLabel);
+    delete lineEdit;
+
+    //replacing save button with modify button
+    QPushButton *modifyBtn = new QPushButton("Modify");
+    modifyBtn->setObjectName("Modify");
+    saveBtn->parentWidget()->layout()->replaceWidget(saveBtn, modifyBtn);
+    QObject::connect(modifyBtn, SIGNAL(clicked()), this, SLOT(onModifyBtnClicked()));
+
+
+    changesSaved = false;
+    delete saveBtn;
 
 }

@@ -166,7 +166,7 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>675</width>
+              <width>662</width>
               <height>120</height>
              </rect>
             </property>
@@ -192,7 +192,14 @@
          <item>
           <widget class="QPushButton" name="addSubTree">
            <property name="text">
-            <string>Add Subtree</string>
+            <string>Add SubGraph</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="opPassBtn">
+           <property name="text">
+            <string>Op. Pass</string>
            </property>
           </widget>
          </item>

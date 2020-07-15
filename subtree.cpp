@@ -36,8 +36,8 @@ subtree::subtree(Node *root, std::vector <Node *> bidSeq, QWidget *parent) :
         QHBoxLayout *childLayout = new QHBoxLayout();
 
         //adding bid button to childlayout
-        QPushButton *bidBtn = new QPushButton(QString::fromStdString(currNode->children[i]->bid));
-        bidBtn->setObjectName(QString::fromStdString(currNode->children[i]->bid));
+        QPushButton *bidBtn = new QPushButton(QString::fromStdString(currNode->children[i]->bid.getBid()));
+        bidBtn->setObjectName(QString::fromStdString(currNode->children[i]->bid.getBid()));
         QObject::connect(bidBtn, SIGNAL(clicked()), this, SLOT(onBidBtnClicked()));
 //        if (bidSeq.size() > 0 && bidSeq[0] == currNode->children[i])
 //            bidBtn->setEnabled(false);
@@ -109,8 +109,8 @@ void subtree::onBidBtnClicked()
         QHBoxLayout *childLayout = new QHBoxLayout();
 
         //adding bid button to childlayout
-        QPushButton *bidBtn = new QPushButton(QString::fromStdString(currNode->children[i]->bid));
-        bidBtn->setObjectName(QString::fromStdString(currNode->children[i]->bid));
+        QPushButton *bidBtn = new QPushButton(QString::fromStdString(currNode->children[i]->bid.getBid()));
+        bidBtn->setObjectName(QString::fromStdString(currNode->children[i]->bid.getBid()));
         QObject::connect(bidBtn, SIGNAL(clicked()), this, SLOT(onBidBtnClicked()));
 //        if (index < bidSeq.size()-1 && bidSeq[index+1] == currNode->children[i])
 //            bidBtn->setEnabled(false);
@@ -169,8 +169,8 @@ void subtree::onSeqBidBtnClicked()
         QHBoxLayout *childLayout = new QHBoxLayout();
 
         //adding bid button to childlayout
-        QPushButton *bidBtn = new QPushButton(QString::fromStdString(currNode->children[i]->bid));
-        bidBtn->setObjectName(QString::fromStdString(currNode->children[i]->bid));
+        QPushButton *bidBtn = new QPushButton(QString::fromStdString(currNode->children[i]->bid.getBid()));
+        bidBtn->setObjectName(QString::fromStdString(currNode->children[i]->bid.getBid()));
         QObject::connect(bidBtn, SIGNAL(clicked()), this, SLOT(onBidBtnClicked()));
 //        if (index < bidSeq.size()-1 && bidSeq[index+1] == currNode->children[i])
 //            bidBtn->setEnabled(false);
@@ -260,8 +260,8 @@ void subtree::on_rootBtn_clicked()
         QHBoxLayout *childLayout = new QHBoxLayout();
 
         //adding bid button to childlayout
-        QPushButton *bidBtn = new QPushButton(QString::fromStdString(currNode->children[i]->bid));
-        bidBtn->setObjectName(QString::fromStdString(currNode->children[i]->bid));
+        QPushButton *bidBtn = new QPushButton(QString::fromStdString(currNode->children[i]->bid.getBid()));
+        bidBtn->setObjectName(QString::fromStdString(currNode->children[i]->bid.getBid()));
         QObject::connect(bidBtn, SIGNAL(clicked()), this, SLOT(onBidBtnClicked()));
 //        if (bidSeq.size() > 0 && bidSeq[0] == currNode->children[i])
 //            bidBtn->setEnabled(false);

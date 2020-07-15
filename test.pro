@@ -1,4 +1,4 @@
-QT       += core gui
+QT       += core gui sql
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -16,8 +16,11 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    bid.cpp \
     bidgrid.cpp \
     bounds.cpp \
+    datainput.cpp \
+    inputmenu.cpp \
     main.cpp \
     node.cpp \
     playerinfo.cpp \
@@ -26,8 +29,11 @@ SOURCES += \
     test.cpp
 
 HEADERS += \
+    bid.h \
     bidgrid.h \
     bounds.h \
+    datainput.h \
+    inputmenu.h \
     node.h \
     playerinfo.h \
     subtree.h \
@@ -36,6 +42,8 @@ HEADERS += \
 
 FORMS += \
     bidgrid.ui \
+    datainput.ui \
+    inputmenu.ui \
     subtree.ui \
     test.ui
 

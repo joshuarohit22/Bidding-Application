@@ -28,12 +28,14 @@ public slots:
 private slots:
     void on_addChildButton_clicked();
     void addChildBid(QString str);
+//    void addOppPassChildBid(QString str);
     void addSubTree(Node *subtreeRoot);
     void onSaveBtnClicked();
     void onModifyBtnClicked();
     void onDelBtnClicked();
     void onBidBtnClicked();
     void onSeqBidBtnClicked();
+    void onDataBtnClicked();
 
     void on_LoadFile_clicked();
 
@@ -44,6 +46,8 @@ private slots:
     void on_newFile_clicked();
 
     void on_addSubTree_clicked();
+
+    void on_opPassBtn_clicked();
 
 private:
     Ui::test *ui;

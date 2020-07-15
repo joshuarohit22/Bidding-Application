@@ -8,38 +8,38 @@
 #include <QLabel>
 #include <QTextDocument>
 #include <sstream>
+#include <bid.h>
 
-const char *getSuit(int j)
+char getSuit(int j)
 {
     switch(j)
     {
         case 0:
-            return "C";
+            return 'C';
         case 1:
-            return "D";
+            return 'D';
         case 2:
-            return "H";
+            return 'H';
         case 3:
-            return "S";
+            return 'S';
         case 4:
-            return "NT";
+            return 'N';
     }
-    return "";
+    return '0';
 }
 
-int getSuitNumber(std::string currBid)
+int getSuitNumber(char suit)
 {
-    currBid.erase(currBid.begin());
 
-    if (currBid == "C")
+    if (suit == 'C')
         return 0;
-    else if (currBid == "D")
+    else if (suit == 'D')
         return 1;
-    else if (currBid == "H")
+    else if (suit == 'H')
         return 2;
-    else if (currBid == "S")
+    else if (suit == 'S')
         return 3;
-    else if (currBid == "NT")
+    else if (suit == 'N')
         return 4;
 
     return 5;
@@ -66,7 +66,7 @@ bidGrid::bidGrid(std::vector <Node *> bidSeq, Node *currNode, QWidget *parent) :
 
     while (i >= 0)
     {
-        if (bidSeq[i]->bid == "Pass" || bidSeq[i]->bid == "Dbl" || bidSeq[i]->bid == "RDbl")
+        if (bidSeq[i]->bid.getBid() == "Pass" || bidSeq[i]->bid.getBid() == "Dbl" || bidSeq[i]->bid.getBid() == "RDbl")
         {
             i = i - 1;
             continue;
@@ -75,29 +75,27 @@ bidGrid::bidGrid(std::vector <Node *> bidSeq, Node *currNode, QWidget *parent) :
             break;
     }
 
-    std::string currBid;
-    if (i < 0)
+    std::vector <Node *> currChildren = currNode->children;
+    bool isChild;
+    int suitLevel;
+    int currLevel;
+
+    if (i >= 0)
     {
-        currBid = "0C";
+        suitLevel = getSuitNumber(bidSeq[i]->bid.getSuit());
+        currLevel = bidSeq[i]->bid.getLevel();
     }
     else
     {
-        currBid = bidSeq[i]->bid;
+        suitLevel = -1;
+        currLevel = -1;
     }
-
-    std::vector <Node *> currChildren = currNode->children;
-    bool isChild;
-
-
-    int suitLevel = getSuitNumber(currBid);
-    int currLevel = getCurrLevel(currBid);
-
     for (int i = 0;i < 7;i++)
     {
         for (int j = 0;j < 5;j++)
         {
             int level = i + 1;
-            const char *suit = getSuit(j);
+            char suit = getSuit(j);
             QString name = QStringLiteral("%1%2").arg(level).arg(suit);
             QPushButton *panelButton = new QPushButton(name);
             panelButton->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
@@ -106,7 +104,7 @@ bidGrid::bidGrid(std::vector <Node *> bidSeq, Node *currNode, QWidget *parent) :
             isChild = false;
             for (auto it = currChildren.begin(); it != currChildren.end();++it)
             {
-                if ((*it)->bid == name.toStdString())
+                if ((*it)->bid.getBid() == name.toStdString())
                 {
                     isChild = true;
                     break;
@@ -124,7 +122,7 @@ bidGrid::bidGrid(std::vector <Node *> bidSeq, Node *currNode, QWidget *parent) :
     isChild = false;
     for (auto it = currChildren.begin(); it != currChildren.end();++it)
     {
-        if ((*it)->bid == "Pass")
+        if ((*it)->bid.getBid() == "Pass")
         {
             isChild = true;
             break;
@@ -136,7 +134,7 @@ bidGrid::bidGrid(std::vector <Node *> bidSeq, Node *currNode, QWidget *parent) :
 
     QPushButton *dblBtn = new QPushButton(QString("Dbl"));
     connect(dblBtn, &QPushButton::clicked, this, &bidGrid::onClicked);
-    if (bidSeq.size() == 0 || (bidSeq.size() != 0 && bidSeq[bidSeq.size()-1]->bid == "Dbl"))
+    if (bidSeq.size() == 0 || (bidSeq.size() != 0 && bidSeq[bidSeq.size()-1]->bid.getBid() == "Dbl"))
     {
         dblBtn->setEnabled(false);
     }
@@ -144,7 +142,7 @@ bidGrid::bidGrid(std::vector <Node *> bidSeq, Node *currNode, QWidget *parent) :
 
     QPushButton *rdblBtn = new QPushButton(QString("RDbl"));
     connect(rdblBtn, &QPushButton::clicked, this, &bidGrid::onClicked);
-    if (bidSeq.size() == 0 || (bidSeq.size() != 0 && bidSeq[bidSeq.size()-1]->bid != "Dbl"))
+    if (bidSeq.size() == 0 || (bidSeq.size() != 0 && bidSeq[bidSeq.size()-1]->bid.getBid() != "Dbl"))
     {
         rdblBtn->setEnabled(false);
     }

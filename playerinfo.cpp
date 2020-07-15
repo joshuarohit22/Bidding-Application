@@ -1,19 +1,39 @@
 #include "playerinfo.h"
+#include <iostream>
 #include <string>
 
 PlayerInfo::PlayerInfo() : hcp(0, 37)
 {
-    std::string suits[] = {"CLUBS", "DIAMONDS", "HEARTS", "SPADES"};
+    char suits[] = {'C', 'D', 'H', 'S', 'N'};
 
     for (auto s : suits)
     {
-        length[s] = bounds(0, 13);
+        length[s] = Bounds(0, 13);
     }
 
-//    struct bounds temp(0, 13);
-//    length["CLUBS"] = temp;
-//    length["DIAMONDS"] = temp;
-//    length["HEARTS"] = temp;
-//    length["SPADES"] = temp;
+}
 
+bool PlayerInfo::suitValid(char suit)
+{
+    if (suit == 'C' || suit == 'D' || suit == 'H' || suit == 'S' || suit == 'N'|| suit == 'X' || suit == 'P'|| suit == 'R')
+    {
+        return true;
+    }
+    return false;
+}
+
+void PlayerInfo::setLength(char suit, int lower, int upper)
+{
+    if (!suitValid(suit))
+    {
+        std::cout << "suit invalid" << std::endl;
+        return;
+    }
+
+    length[suit].setBounds(lower, upper);
+}
+
+void PlayerInfo::setHcp(int lower, int upper)
+{
+    hcp.setBounds(lower, upper);
 }
